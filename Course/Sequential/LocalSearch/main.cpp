@@ -51,8 +51,37 @@ int main(){
     }
 
     // Algorithm
+    std::default_random_engine generator(1337);
+    std::uniform_real_distribution<double> coin_distro(0,1);
+
+    const int bag_amount = 10;
+    std::vector<Knapsack> bags;
+    for(int i = 0; i<bag_amount; i++){
+        bags.push_back({i,0,{}});
+        bags[i].arr.reserve(n);
+        for(int j = 0; j<n; j++) {
+            bags[i].arr.push_back(false);
+        }
+    }
+
+    double coin;
+    for(int i = 0; i<bag_amount; i++){
+        for(int j = 0; j<n; j++){
+            bags[i].arr[j] = false;
+            coin = coin_distro(generator);
+            if(coin > 0.5){
+                if (bags[i].weight + items[j].weight < W){
+                    bags[i].arr[j] = true;
+                    bags[i].weight += items[j].weight;
+                }
+            }
+        }
+    }
 
     // Print output
+    for(auto& el: bags){
+        print_knapsack(el, items);
+    }
     
     return 0;
 }
