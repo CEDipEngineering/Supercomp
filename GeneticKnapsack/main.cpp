@@ -11,7 +11,10 @@
 #define MUTATION_RATE 0.1f 
 #define GENERATIONS 1000
 
-#define DEBUG true
+// Set to true to view debug outputs
+// Warning this will print every generation's debug info (VERY VERBOSE)
+// Recommended to set GENERATIONS to a low number, to facilitate visualization 
+#define DEBUG false
 
 struct Item {
     int id;
@@ -27,7 +30,7 @@ struct Individual {
 // Random Number Generators
 std::default_random_engine generator(1337);
 std::uniform_int_distribution<int> weight_distro(1,15);
-std::uniform_int_distribution<int> value_distro(1,100);
+std::uniform_int_distribution<int> value_distro(1,CAPACITY);
 std::uniform_real_distribution<double> coin_distro(0,1);
 std::uniform_int_distribution<int> item_distro(0,ITEM_AMOUNT-1);
 std::uniform_int_distribution<int> parent_distro(0,HALF_POP-1);
@@ -105,9 +108,18 @@ int main(){
         std::cout << "===========================================================================================" << std::endl;
     }
     
-    // Create initial population
     std::vector<Individual> population;
+    std::vector<Individual> parents;
+    std::vector<Individual> best_history;
     population.reserve(POP_SIZE);
+    parents.reserve(POP_SIZE);
+    best_history.reserve(GENERATIONS);
+    Individual t;
+    int index1, index2;
+    Individual child;
+    Individual mutant;
+
+    // Create initial population
     for (int i = 0; i < POP_SIZE; i++){
         population.push_back({0, {}});
         for (int j = 0; j < ITEM_AMOUNT; j++){
@@ -115,6 +127,15 @@ int main(){
         }
         population[i].fitness = 0;
     }
+    // Initialize history
+    for (int i = 0; i < GENERATIONS; i++){
+        // best_history.push_back({0,{}});
+        for (int j = 0; j < ITEM_AMOUNT; j++){
+            best_history[i].arr[j] = false;
+        }
+        best_history[i].fitness = 0;
+    }
+    
     
     if(DEBUG){
         std::cout << "Initial Population (" << POP_SIZE << " members x " << ITEM_AMOUNT << " items): " << std::endl;
@@ -128,94 +149,131 @@ int main(){
         std::cout << "FITNESS" << std::endl;
     }
 
-    for (int i = 0; i < POP_SIZE; i++){
-        population[i].fitness = individual_fitness(population[i], item_list);
-    }
-    std::sort(population.begin(), population.end(), compare_fitness);
-    
-    if(DEBUG){
+    for(int gen = 0; gen<GENERATIONS; gen++){
+        // Calculate fitness for whole population
         for (int i = 0; i < POP_SIZE; i++){
-            for (int j = 0; j < ITEM_AMOUNT; j++){
-                std::cout << (int) population[i].arr[j] << " ";
-            }   
-            std::cout << "Fitness: " << population[i].fitness << std::endl;
+            population[i].fitness = individual_fitness(population[i], item_list);
+        }
+        std::sort(population.begin(), population.end(), compare_fitness);
+        
+        // Save best individual for later
+        // best_history[gen].fitness = population[0].fitness;
+        // for(int it; it<ITEM_AMOUNT; it++){
+        //     best_history[gen].arr[it] = population[0].arr[it];
+        // }
+        best_history.push_back(population[0]); 
+        if(DEBUG){
+            for (int i = 0; i < POP_SIZE; i++){
+                for (int j = 0; j < ITEM_AMOUNT; j++){
+                    std::cout << (int) population[i].arr[j] << " ";
+                }   
+                std::cout << "Fitness: " << population[i].fitness << std::endl;
+            }
+
+            std::cout << "===========================================================================================" << std::endl;
+            std::cout << "PARENTS" << std::endl;
+        }   
+        
+        // Separate best half of population as parents
+        t.fitness = 0;
+        for (int i = 0; i<HALF_POP; i++){
+            std::copy(population[i].arr, population[i].arr + ITEM_AMOUNT, t.arr);
+            t.fitness = population[i].fitness; // Just for debugging, not necessary
+            parents.push_back(t);
         }
 
-        std::cout << "===========================================================================================" << std::endl;
-        std::cout << "PARENTS" << std::endl;
-    }
+        if(DEBUG){
+            for (int i = 0; i < HALF_POP; i++){
+                for (int j = 0; j < ITEM_AMOUNT; j++){
+                    std::cout << (int) parents[i].arr[j] << " ";
+                }   
+                std::cout << "Fitness: " << parents[i].fitness << std::endl;
+            }
 
-    std::vector<Individual> parents;
-    parents.reserve(POP_SIZE);
-    Individual t;
-    t.fitness = 0;
-    for (int i = 0; i<HALF_POP; i++){
-        std::copy(population[i].arr, population[i].arr + ITEM_AMOUNT, t.arr);
-        t.fitness = population[i].fitness; // Just for debugging, not necessary
-        parents.push_back(t);
-    }
-
-    if(DEBUG){
-        for (int i = 0; i < HALF_POP; i++){
-            for (int j = 0; j < ITEM_AMOUNT; j++){
-                std::cout << (int) parents[i].arr[j] << " ";
-            }   
-            std::cout << "Fitness: " << parents[i].fitness << std::endl;
+            std::cout << "===========================================================================================" << std::endl;
+            std::cout << "CROSSOVER AND MUTATION" << std::endl;
         }
 
-        std::cout << "===========================================================================================" << std::endl;
-        std::cout << "CROSSOVER AND MUTATION" << std::endl;
-    }
-
-    int index1, index2;
-    Individual child;
-    for (int i=0; i<HALF_POP; i++){
-        index1 = parent_distro(generator);
-        index2 = parent_distro(generator);
-        child = crossover(&(parents[index1]), &(parents[index2]));
-        parents.push_back(child);
-    }
-
-    if(DEBUG){
-        for (int i = HALF_POP; i < POP_SIZE; i++){
-            for (int j = 0; j < ITEM_AMOUNT; j++){
-                std::cout << (int) parents[i].arr[j] << " ";
-            }   
-            std::cout << "Fitness: " << parents[i].fitness << std::endl;
+        // Crossover random parents to create other half of population
+        for (int i=0; i<HALF_POP; i++){
+            index1 = parent_distro(generator);
+            index2 = parent_distro(generator);
+            child = crossover(&(parents[index1]), &(parents[index2]));
+            parents.push_back(child);
         }
 
-        std::cout << "MUTATIONS" << std::endl;
-    }
+        if(DEBUG){
+            for (int i = HALF_POP; i < POP_SIZE; i++){
+                for (int j = 0; j < ITEM_AMOUNT; j++){
+                    std::cout << (int) parents[i].arr[j] << " ";
+                }   
+                std::cout << "Fitness: " << parents[i].fitness << std::endl;
+            }
 
-    for (int i = HALF_POP; i<POP_SIZE; i++){
-        parents[i] = mutate(parents[i]);
-    }
+            std::cout << "MUTATIONS" << std::endl;
+        }
 
-    if(DEBUG){
-        for (int i = HALF_POP; i < POP_SIZE; i++){
+        // Apply random mutations to children
+        for (int i = HALF_POP; i<POP_SIZE; i++){
+            mutant = mutate(parents[i]);
+            for(int j = 0; j<ITEM_AMOUNT; j++){
+                parents[i].arr[j] = mutant.arr[j];
+            }
+        }
+
+        if(DEBUG){
+            for (int i = HALF_POP; i < POP_SIZE; i++){
+                for (int j = 0; j < ITEM_AMOUNT; j++){
+                    std::cout << (int) parents[i].arr[j] << " ";
+                }   
+                std::cout << "Fitness: " << parents[i].fitness << std::endl;
+            }
+        }
+        population.clear();
+        // Set population from parents and children
+        for (int i = 0; i < POP_SIZE; i++){
+            population.push_back({0,{}});
             for (int j = 0; j < ITEM_AMOUNT; j++){
-                std::cout << (int) parents[i].arr[j] << " ";
+                population[i].arr[j] = parents[i].arr[j];
             }   
-            std::cout << "Fitness: " << parents[i].fitness << std::endl;
+        }
+
+        if(DEBUG){
+            std::cout << "Population at end of generation" << std::endl;
+            for (int i = 0; i < POP_SIZE; i++){
+                for (int j = 0; j < ITEM_AMOUNT; j++){
+                    std::cout << (int) population[i].arr[j] << " ";
+                }   
+                std::cout << "Fitness: " << population[i].fitness << std::endl;
+            }
+            std::cout << "=================================" << std::endl << "END OF GENERATION" << std::endl << "=================================" << std::endl;
         }
     }
 
-    // Run Experiment
-        // Loop through generations
-        // 1. Calculate fitness
-        // 2. Select fittest members as parents
-        // 3. Crossover parents
-        // 4. Apply random mutations to offspring
-        // 5. Rebuild population by using parents and mutants (which contain all offspring including non-mutated ones)
-        // 6. Go to step 1
-
-    
-
-
-    // for(int i = 0; i<10; i++){
-    //     std::cout << weight_distro(generator) << std::endl;
-    //     std::cout << value_distro(generator) << std::endl;
-    // }
-
+    std::cout << "Best Individuals for generations: " << std::endl;
+    for(int gen = 0; gen<GENERATIONS; gen++){
+        if(gen%10==0){
+            std::cout << "Generation " << gen+1 << ":\t\t";
+            for(int i = 0; i<ITEM_AMOUNT; i++){
+                std::cout << best_history[gen].arr[i] << " ";
+            }
+            std::cout << "Fitness: " << best_history[gen].fitness << std::endl;
+        } else if (gen == GENERATIONS-1){
+            std::cout << "==================================" << std::endl;
+            std::cout << "Final Generation: " << std::endl;
+            for(int i = 0; i<ITEM_AMOUNT; i++){
+                std::cout << best_history[gen].arr[i] << " ";
+            }
+            std::cout << "Fitness: " << best_history[gen].fitness << std::endl;
+            std::cout << "==================================" << std::endl;
+        }
+    }
+    std::sort(best_history.begin(), best_history.end(), compare_fitness);
+    std::cout << "Best knapsack in history: " << std::endl;
+    std::cout << "Fitness: " << best_history[0].fitness << std::endl;
+    for(int i = 0; i<ITEM_AMOUNT; i++){
+        std::cout << (int) best_history[0].arr[i] << " ";
+    }
+    std::cout << std::endl;
     return 0;
 }

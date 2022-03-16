@@ -4,9 +4,9 @@
 #include <vector>
 #include <bits/stdc++.h>
 
-const int MATCH = 2;
-const int MISMATCH = -1;
-const int GAP = -1;
+#define MATCH 2
+#define MISMATCH -1
+#define GAP -1
 
 int w(std::string a, std::string b, int i, int j){
     if (a[i] == b[j]){
