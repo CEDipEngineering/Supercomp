@@ -53,6 +53,7 @@ int main(){
     // Algorithm
     std::default_random_engine generator(1337);
     std::uniform_real_distribution<double> coin_distro(0,1);
+    std::uniform_int_distribution<int> random_item_distro(0,n-1);
 
     const int bag_amount = 10;
     std::vector<Knapsack> bags;
@@ -77,6 +78,19 @@ int main(){
             }
         }
     }
+
+    // Try to add another item to each bag
+    for(int i = 0; i<bag_amount; i++){
+        int ix = random_item_distro(generator);
+        if(!bags[i].arr[ix]){
+            if (bags[i].weight + items[ix].weight < W){
+                bags[i].arr[ix] = true;
+                bags[i].weight += items[ix].weight;
+            }
+        }
+    }
+
+
 
     // Print output
     for(auto& el: bags){
