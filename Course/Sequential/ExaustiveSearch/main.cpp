@@ -2,73 +2,16 @@
 #include<vector>
 #include<algorithm>
 #include<random>
+#include<bitset>
+
+#define BITSIZE 48
+
 
 struct Item {
     int id;
     int weight;
     int value;
 };
-
-struct Knapsack {
-    int id;
-    int weight;
-    std::vector<bool> arr;
-};
-
-void print_knapsack(Knapsack k){
-    std::cout << "Knapsack " << k.id << std::endl;
-    std::cout << "Weight: " << k.weight << std::endl;
-    for(int i = 0; i<(int)k.arr.size(); i++){
-        std::cout << k.arr[i] << " ";
-    }
-    std::cout << std::endl;
-}
-
-void print_knapsack(Knapsack k, std::vector<Item> items){
-    std::cout << "Knapsack " << k.id << std::endl;
-    std::cout << "Weight: " << k.weight << std::endl;
-    int totalValue = 0;
-    for(int i = 0; i<(int)k.arr.size(); i++){
-        std::cout << k.arr[i] << " ";
-        totalValue += k.arr[i]*items[i].value;
-    }
-    std::cout << std::endl << "Total value: " << totalValue << std::endl;
-}
-
-int fitness(Knapsack k, std::vector<Item> items){
-    int totalValue = 0;
-    for(int i = 0; i<(int)k.arr.size(); i++){
-        totalValue += k.arr[i]*items[i].value;
-    }
-    return totalValue;
-}
-
-Knapsack solve(Knapsack k, int capacity, std::vector<Item> items, int index){
-    // print_knapsack(k,items);
-    std::cout << index << std::endl;
-    if(index == (int)items.size()){
-        if(items[index].weight + k.weight < capacity){
-            k.arr[index] = true;
-            k.weight += items[index].weight;
-            return k;
-        } else {
-            return k;
-        }
-    }
-    Knapsack a, b;
-    a = solve(k, capacity, items, index+1);
-    if(items[index].weight + k.weight < capacity){
-        k.arr[index] = true;
-        k.weight += items[index].weight;
-        b = solve(k, capacity-items[index].weight, items, index+1);
-    } else {
-        return a;
-    }
-    if(fitness(a, items)>fitness(b, items)){
-        return a;
-    }
-    return b;
-}
 
 int main(){
     // Read number of items and capacity of knapsacks
@@ -86,15 +29,33 @@ int main(){
     }
 
     // Algorithm
-    Knapsack best = {0,0,{}};
-    best.arr.reserve(n);
-    for(int i = 0; i<n; i++){
-        best.arr.push_back(false);
+    std::bitset<BITSIZE> best(0);
+    long value, weight, maxValue, maxWeight;
+    maxValue = -1;
+    maxWeight = -1;
+    for(long i = 0; i<(2<<(n-1)); i++){
+        std::bitset<BITSIZE> b(i);
+        value = 0;
+        weight = 0;
+        for(long j = 0; j<n; j++){
+            if(b[j]){
+                value+=items[j].value;
+                weight+=items[j].weight;
+            }
+        }
+        // std::cout << "Knapsack: " << b << " Value: " << value << " Weight: " << weight << std::endl;
+        if(weight<=W && value>=maxValue){
+            best = b;
+            maxValue = value;
+            maxWeight = weight;
+        }
     }
-    best = solve(best, W, items, 0);
 
-    // Print output
-    print_knapsack(best, items);
-    
+    // Output
+    std::cout << "Best knapsack possible: "; 
+    for(long i = 0; i<n; i++){
+        std::cout << best[i] << " "; 
+    }
+    std::cout << "Weight: " << maxWeight << " Value: " << maxValue << std::endl;
     return 0;
 }
