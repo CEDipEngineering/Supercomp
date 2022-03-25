@@ -2,14 +2,17 @@
 #include <vector>
 #include <random>
 #include <algorithm>
+#include <fstream>
+#include <chrono>
 
-#define POP_SIZE 16
+#define POP_SIZE 256
 #define HALF_POP POP_SIZE/2
 #define CAPACITY 100
 #define ITEM_AMOUNT 40
 #define CROSSOVER_RATE 0.8f
 #define MUTATION_RATE 0.1f 
-#define GENERATIONS 1000
+#define GENERATIONS 200000
+#define PRINT_GENERATIONS false
 
 // Set to true to view debug outputs
 // Warning this will print every generation's debug info (VERY VERBOSE)
@@ -91,6 +94,7 @@ Individual mutate(Individual individual){
 bool compare_fitness(Individual a, Individual b){return (a.fitness > b.fitness);}
 
 int main(){
+    auto begin = std::chrono::high_resolution_clock::now();
     // Make item samples
     if(DEBUG){
         std::cout << "Item List:" << std::endl;
@@ -103,6 +107,14 @@ int main(){
             std::cout << item_list[i].id << "\t" << item_list[i].weight << "\t" << item_list[i].value << std::endl; 
         }
     }
+
+    std::ofstream item_file ("items.txt");
+    item_file << ITEM_AMOUNT << " " << CAPACITY << std::endl;
+    for(auto& el: item_list){
+        item_file << el.weight << " " << el.value << std::endl;
+    }
+    item_file << std::endl;
+    item_file.close();
 
     if(DEBUG){
         std::cout << "===========================================================================================" << std::endl;
@@ -156,11 +168,6 @@ int main(){
         }
         std::sort(population.begin(), population.end(), compare_fitness);
         
-        // Save best individual for later
-        // best_history[gen].fitness = population[0].fitness;
-        // for(int it; it<ITEM_AMOUNT; it++){
-        //     best_history[gen].arr[it] = population[0].arr[it];
-        // }
         best_history.push_back(population[0]); 
         if(DEBUG){
             for (int i = 0; i < POP_SIZE; i++){
@@ -249,25 +256,27 @@ int main(){
             std::cout << "=================================" << std::endl << "END OF GENERATION" << std::endl << "=================================" << std::endl;
         }
     }
-
-    std::cout << "Best Individuals for generations: " << std::endl;
-    for(int gen = 0; gen<GENERATIONS; gen++){
-        if(gen%10==0){
-            std::cout << "Generation " << gen+1 << ":\t\t";
-            for(int i = 0; i<ITEM_AMOUNT; i++){
-                std::cout << best_history[gen].arr[i] << " ";
+    if(PRINT_GENERATIONS){
+        std::cout << "Best Individuals for generations: " << std::endl;
+        for(int gen = 0; gen<GENERATIONS; gen++){
+            if(gen%10==0){
+                std::cout << "Generation " << gen+1 << ":\t\t";
+                for(int i = 0; i<ITEM_AMOUNT; i++){
+                    std::cout << best_history[gen].arr[i] << " ";
+                }
+                std::cout << "Fitness: " << best_history[gen].fitness << std::endl;
+            } else if (gen == GENERATIONS-1){
+                std::cout << "==================================" << std::endl;
+                std::cout << "Final Generation: " << std::endl;
+                for(int i = 0; i<ITEM_AMOUNT; i++){
+                    std::cout << best_history[gen].arr[i] << " ";
+                }
+                std::cout << "Fitness: " << best_history[gen].fitness << std::endl;
+                std::cout << "==================================" << std::endl;
             }
-            std::cout << "Fitness: " << best_history[gen].fitness << std::endl;
-        } else if (gen == GENERATIONS-1){
-            std::cout << "==================================" << std::endl;
-            std::cout << "Final Generation: " << std::endl;
-            for(int i = 0; i<ITEM_AMOUNT; i++){
-                std::cout << best_history[gen].arr[i] << " ";
-            }
-            std::cout << "Fitness: " << best_history[gen].fitness << std::endl;
-            std::cout << "==================================" << std::endl;
         }
     }
+    
     std::sort(best_history.begin(), best_history.end(), compare_fitness);
     std::cout << "Best knapsack in history: " << std::endl;
     std::cout << "Fitness: " << best_history[0].fitness << std::endl;
@@ -275,5 +284,8 @@ int main(){
         std::cout << (int) best_history[0].arr[i] << " ";
     }
     std::cout << std::endl;
+    auto end = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    printf("Time measured: %.6f seconds.\n", elapsed.count() * 1e-9);
     return 0;
 }

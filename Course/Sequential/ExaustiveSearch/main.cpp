@@ -1,61 +1,76 @@
-#include <iostream>
+#include<iostream>
 #include<vector>
 #include<algorithm>
-#include<random>
-#include<bitset>
+#include <chrono>
+using namespace std;
 
-#define BITSIZE 48
-
-
-struct Item {
+struct item
+{
     int id;
-    int weight;
-    int value;
+    double peso;
+    double valor;
+    
 };
 
-int main(){
-    // Read number of items and capacity of knapsacks
+double knapSack2(int W, vector<item> items, vector<item>& usados, vector<item>& melhor){
+    double valor = 0.0;
+    double peso = 0.0;
+    double sem_i = 0.0, com_i = 0.0;
+    vector<item> items2 = items;
+    if(items.empty() || W == 0)
+        return 0;
+    if(items[0].peso <= W){
+        usados.push_back(items[0]);
+        valor = items[0].valor;
+        peso = items[0].peso;
+        items.erase(items.begin());
+        com_i = knapSack2(W - peso, items, usados, melhor);
+    }
+    items2.erase(items2.begin());
+    sem_i = knapSack2(W, items2, usados, melhor);
+    double valor_atual = 0.0, valor_melhor = 0.0;
+    for(auto& el : usados){
+        valor_atual += el.valor;
+    }
+    for(auto& el : melhor){
+        valor_melhor += el.valor;
+    }
+    if(valor_atual > valor_melhor)
+        melhor = usados;
+    usados.clear();
+    return max(sem_i, valor + com_i);
+    
+}
+
+int main() {
+    auto begin = std::chrono::high_resolution_clock::now();
+
     int n = 0;
     int W = 0;
-    std::cin >> n >> W;
 
-    // Read all items
-    std::vector<Item> items;
+    vector<item> mochila;
+
+    cin >> n >> W; //numero de elementos e peso
+    // cout << "Numero de elementos = " << n << "\n";
+    // cout << "Capacidade da mochila = " << W << "\n";
+    vector<item> items;
+    vector<item> usado;
+    vector<item> melhor;
     items.reserve(n);
-    int w,v;
-    for(int i = 0; i<n; i++){
-        std::cin >> w >> v;
-        items.push_back({i, w, v});
+    usado.reserve(n);
+    double peso, valor;
+    for(int i = 0; i < n; i++) {
+        cin >> peso;
+        cin >> valor;
+        items.push_back({i, peso, valor});
     }
-
-    // Algorithm
-    std::bitset<BITSIZE> best(0);
-    long value, weight, maxValue, maxWeight;
-    maxValue = -1;
-    maxWeight = -1;
-    for(long i = 0; i<(2<<(n-1)); i++){
-        std::bitset<BITSIZE> b(i);
-        value = 0;
-        weight = 0;
-        for(long j = 0; j<n; j++){
-            if(b[j]){
-                value+=items[j].value;
-                weight+=items[j].weight;
-            }
-        }
-        // std::cout << "Knapsack: " << b << " Value: " << value << " Weight: " << weight << std::endl;
-        if(weight<=W && value>=maxValue){
-            best = b;
-            maxValue = value;
-            maxWeight = weight;
-        }
+    
+    cout << "RESULTADO = " << knapSack2(W, items, usado, melhor) << "\n";
+    for(auto& el: melhor) {
+            cout << el.id << " ";
     }
-
-    // Output
-    std::cout << "Best knapsack possible: "; 
-    for(long i = 0; i<n; i++){
-        std::cout << best[i] << " "; 
-    }
-    std::cout << "Weight: " << maxWeight << " Value: " << maxValue << std::endl;
+    auto end = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    printf("\nTime measured: %.6f seconds.\n", elapsed.count() * 1e-9);
     return 0;
 }
