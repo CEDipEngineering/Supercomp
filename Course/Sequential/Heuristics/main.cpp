@@ -16,8 +16,6 @@ struct Knapsack {
 };
 
 void print_knapsack(Knapsack k){
-    std::cout << "Knapsack " << k.id << std::endl;
-    std::cout << "Weight: " << k.weight << std::endl;
     for(int i = 0; i<(int)k.arr.size(); i++){
         std::cout << k.arr[i] << " ";
     }
@@ -51,40 +49,43 @@ int main(){
     }
 
     // Algorithm
-        Knapsack bag_light, bag_valuable;
-        bag_light = {0,0,{}};
-        bag_valuable = {1,0,{}};
-        bag_light.arr.reserve(n);
-        bag_valuable.arr.reserve(n);
+        Knapsack bag_light, knap;
+        // bag_light = {0,0,{}};
+        // bag_light.arr.reserve(n);
+        knap = {1,0,{}};
+        knap.arr.reserve(n);
+        for(int i = 0; i<n; i++){
+            knap.arr.push_back(false);
+        }
         
-        // Most expensive
-        std::sort(items.begin(), items.end(), [](Item a, Item b){return a.value > b.value;});
+        // Best v/w ratio
+        std::sort(items.begin(), items.end(), [](Item a, Item b){return a.value/a.weight > b.value/b.weight;});
         for (auto& el : items){
-            if(el.weight + bag_valuable.weight <= W){
-                bag_valuable.weight += el.weight;
-                bag_valuable.arr.push_back(true);
+            if(el.weight + knap.weight <= W){
+                knap.weight += el.weight;
+                knap.arr[el.id] = true;
             } else {
-                bag_valuable.arr.push_back(false);
+                knap.arr[el.id] = false;
             }
         }
 
-        // Lightest
-        std::sort(items.begin(), items.end(), [](Item a, Item b){return a.weight < b.weight;});
-        for (auto& el : items){
-            if(el.weight + bag_light.weight <= W){
-                bag_light.weight += el.weight;
-                bag_light.arr.push_back(true);
-            } else {
-                bag_light.arr.push_back(false);
-            }
-        }
+        // // Lightest
+        // std::sort(items.begin(), items.end(), [](Item a, Item b){return a.weight < b.weight;});
+        // for (auto& el : items){
+        //     if(el.weight + bag_light.weight <= W){
+        //         bag_light.weight += el.weight;
+        //         bag_light.arr.push_back(true);
+        //     } else {
+        //         bag_light.arr.push_back(false);
+        //     }
+        // }
 
 
     // Print output
-    std::cout << "Light Backpack" << std::endl;
-    print_knapsack(bag_light, items);
-    std::cout << "Valuable Backpack" << std::endl;
-    print_knapsack(bag_valuable, items);
+    // std::cout << "Light Backpack" << std::endl;
+    // print_knapsack(bag_light, items);
+    // std::cout << "Valuable Backpack" << std::endl;
+    print_knapsack(knap);
     
     return 0;
 }

@@ -16,8 +16,6 @@ struct Knapsack {
 };
 
 void print_knapsack(Knapsack k){
-    std::cout << "Knapsack " << k.id << std::endl;
-    std::cout << "Weight: " << k.weight << std::endl;
     for(int i = 0; i<(int)k.arr.size(); i++){
         std::cout << k.arr[i] << " ";
     }
@@ -54,7 +52,7 @@ int main(){
     std::default_random_engine generator(1337);
     std::uniform_real_distribution<double> coin_distro(0,1);
 
-    const int bag_amount = 10;
+    const int bag_amount = 100;
     std::vector<Knapsack> bags;
     for(int i = 0; i<bag_amount; i++){
         bags.push_back({i,0,{}});
@@ -63,9 +61,12 @@ int main(){
             bags[i].arr.push_back(false);
         }
     }
-
+    int maxVal = -1;
+    int maxIndex = 0;
+    int val = 0;
     double coin;
     for(int i = 0; i<bag_amount; i++){
+        val = 0;
         for(int j = 0; j<n; j++){
             bags[i].arr[j] = false;
             coin = coin_distro(generator);
@@ -73,15 +74,18 @@ int main(){
                 if (bags[i].weight + items[j].weight < W){
                     bags[i].arr[j] = true;
                     bags[i].weight += items[j].weight;
+                    val += items[j].value;
                 }
             }
+        }
+        if (val > maxVal){
+            maxVal = val;
+            maxIndex = i;
         }
     }
 
     // Print output
-    for(auto& el: bags){
-        print_knapsack(el, items);
-    }
+    print_knapsack(bags[maxIndex]);
 
     return 0;
 }

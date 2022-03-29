@@ -16,8 +16,6 @@ struct Knapsack {
 };
 
 void print_knapsack(Knapsack k){
-    std::cout << "Knapsack " << k.id << std::endl;
-    std::cout << "Weight: " << k.weight << std::endl;
     for(int i = 0; i<(int)k.arr.size(); i++){
         std::cout << k.arr[i] << " ";
     }
@@ -91,11 +89,21 @@ int main(){
     }
 
 
-
+    int maxVal = -1;
+    int maxIndex = 0;
+    int val = 0;
     // Print output
-    for(auto& el: bags){
-        print_knapsack(el, items);
+    for(int i = 0; i<bag_amount; i++){
+        val = 0;
+        for (int j = 0; j<n; j++){
+            val+=bags[i].arr[j]*items[j].value;
+        }
+        if (val > maxVal){
+            maxVal = val;
+            maxIndex = i;
+        }
     }
+    print_knapsack(bags[maxIndex]);
     
     return 0;
 }
