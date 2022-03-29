@@ -8,7 +8,7 @@ for i in range(1,9):
     wv = list(zip(weights.split('\n')[:-2],values.split('\n')[:-2]))
     wv = list(map(lambda x: ' '.join(x), wv))
     with open('test{0}.txt'.format(i), 'w') as f:
-        f.write("{0} {1}\n{2}".format(int(capacity),len(weights.split('\n'))-1,'\n'.join(wv)))
+        f.write("{1} {0}\n{2}".format(int(capacity),len(weights.split('\n'))-1,'\n'.join(wv)))
 
     with open('solution{0}.txt'.format(i), 'w') as f:
         f.write(solution.replace('\n', ' '))
