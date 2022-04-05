@@ -54,7 +54,7 @@ int main(){
         }
 
         // Random subsize
-        std::cout << "Subsequence size: " << subseq_size << std::endl;
+        // std::cout << "Subsequence size: " << subseq_size << std::endl;
         std::uniform_int_distribution<int> index_distro(0,len_b-subseq_size);
 
         // Assemble substring b
@@ -79,12 +79,12 @@ int main(){
 
 
     // Output
-    std::cout << "Sequências: " << std::endl;
-    std::cout << sb << std::endl;
-    for(int j = 0; j<subseq_size; j++){
-        std::cout << a[best_ix+j];
-    } 
-    std::cout << std::endl << "Score: " << max_score << std::endl;
+    // std::cout << "Sequências: " << std::endl;
+    // std::cout << sb << std::endl;
+    // for(int j = 0; j<subseq_size; j++){
+    //     std::cout << a[best_ix+j];
+    // } 
+    // std::cout << std::endl << "Score: " << max_score << std::endl;
 
     return 0;
 }

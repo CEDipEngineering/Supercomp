@@ -1,3 +1,3 @@
 main: main.cpp
-	g++ -O3 -Wall main.cpp -o main
+	g++ -Og -Wall main.cpp -o main
 	./main < dna.seq
