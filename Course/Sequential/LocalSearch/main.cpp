@@ -1,7 +1,7 @@
 #include <iostream>
-#include<vector>
-#include<algorithm>
-#include<random>
+#include <vector>
+#include <algorithm>
+#include <random>
 
 struct Item {
     int id;
