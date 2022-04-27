@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 test_list = list(map(lambda x: 'in/'+x, os.listdir('in')))
 
-exe = ['Sequential/LocalSearch/main', 'Sequential/SmithWaterman/main']
+exe = ['Sequential/LocalSearch/main', 'Sequential/SmithWaterman/main', 'Sequential/ExaustiveSearch/main', 'Sequential/BoundedExaustiveSearch/main']
 
 time_dict = {}
 for x in exe:

@@ -8,6 +8,8 @@
 #define MISMATCH -1
 #define GAP -1
 
+#define SHOW_REPORT false
+
 int match_score(std::string sb, std::string a, int start, int subseq_size){
     int score = 0;
     char sa;
@@ -79,12 +81,16 @@ int main(){
 
 
     // Output
-    // std::cout << "Sequências: " << std::endl;
-    // std::cout << sb << std::endl;
-    // for(int j = 0; j<subseq_size; j++){
-    //     std::cout << a[best_ix+j];
-    // } 
-    // std::cout << std::endl << "Score: " << max_score << std::endl;
+    if (SHOW_REPORT){
+        std::cout << "Sequências: " << std::endl;
+        std::cout << sb << std::endl;
+        for(int j = 0; j<subseq_size; j++){
+            std::cout << a[best_ix+j];
+        } 
+        std::cout << std::endl << "Score: " << max_score << std::endl;
+    } else {
+        std::cout << max_score << std::endl;
+    }
 
     return 0;
 }

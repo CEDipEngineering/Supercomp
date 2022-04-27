@@ -7,6 +7,8 @@
 #define MISMATCH -1
 #define GAP -1
 
+#define SHOW_REPORT false
+
 std::set<std::string> make_all_subsets(std::string a){
     std::set<std::string> sub;
     int n = a.length();
@@ -88,7 +90,11 @@ int main(){
     
     
     // Output
-    std::cout << "Score for best possible match is "<< best_score << " between " << std::endl << best_a << " and "<< std::endl << best_b << std::endl;
+    if(SHOW_REPORT){
+        std::cout << "Score for best possible match is "<< best_score << " between " << std::endl << best_a << " and "<< std::endl << best_b << std::endl;
+    } else {
+        std::cout << best_score << std::endl;
+    }
 
 
     return 0;

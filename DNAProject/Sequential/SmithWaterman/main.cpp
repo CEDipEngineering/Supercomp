@@ -8,6 +8,8 @@
 #define MISMATCH -1
 #define GAP -1
 
+#define SHOW_REPORT false
+
 int w(std::string a, std::string b, int i, int j){
     if (a[i] == b[j]){
         return MATCH;
@@ -131,13 +133,18 @@ int main(){
         best_match.push_back(a[el.i]);
     }
 
-    // for(int i=0; i<n; i++){
-    //     for (int j=0; j<m; j++){
-    //         std::cout << H[i][j].value << "\t";
-    //     }
-    //     std::cout << std::endl;
-    // }
-    // std::reverse(best_match.begin(), best_match.end());
-    // std::cout << "Best match found is: " << best_match << " with a score of " << max_v <<  std::endl;
+
+    if (SHOW_REPORT) {
+        for(int i=0; i<n; i++){
+            for (int j=0; j<m; j++){
+                std::cout << H[i][j].value << "\t";
+            }
+            std::cout << std::endl;
+        }
+        std::reverse(best_match.begin(), best_match.end());
+        std::cout << "Best match found is: " << best_match << " with a score of " << max_v <<  std::endl;
+    } else {
+        std::cout << max_v <<  std::endl;
+    }
     return 0;
 }

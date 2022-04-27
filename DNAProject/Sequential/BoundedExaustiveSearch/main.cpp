@@ -7,6 +7,8 @@
 #define MISMATCH -1
 #define GAP -1
 
+#define SHOW_REPORT false
+
 int match_score(std::string a, std::string b){
     // a and b must be of equal size
     int score = 0;
@@ -77,7 +79,7 @@ int main(){
                         if (score > curr_size*MATCH) {
                             break;
                         }
-                        std::cout << high_score << " " << match_small << std::endl << match_big << std::endl;
+                        // std::cout << high_score << " " << match_small << std::endl << match_big << std::endl;
                     }
                 }
             }
@@ -89,12 +91,16 @@ int main(){
 
 
     // Output
-    std::cout << std::endl << std::endl;
-    std::cout << "REPORT:" << std::endl;
-    std::cout << "Best Score found: " << high_score << std::endl;
-    std::cout << "Strings that produced said score: " << std::endl << match_small << std::endl << match_big << std::endl;
-    std::cout << "Number of iterations: " << num_iter << std::endl;
-    printf("Time measured: %.6f seconds.\n", elapsed.count() * 1e-9);
+    if (SHOW_REPORT){
+        std::cout << std::endl << std::endl;
+        std::cout << "REPORT:" << std::endl;
+        std::cout << "Best Score found: " << high_score << std::endl;
+        std::cout << "Strings that produced said score: " << std::endl << match_small << std::endl << match_big << std::endl;
+        std::cout << "Number of iterations: " << num_iter << std::endl;
+        printf("Time measured: %.6f seconds.\n", elapsed.count() * 1e-9);
+    } else {
+        std::cout << high_score << std::endl;
+    }
 
     return 0;
 }
