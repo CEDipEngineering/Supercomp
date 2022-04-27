@@ -44,7 +44,7 @@ int main(){
     std::string a, b;
     std::cin >> a >> b;
 
-    std::cout << size_a << ": " << a << std::endl << size_b << ": " << b << std::endl;
+    // std::cout << size_a << ": " << a << std::endl << size_b << ": " << b << std::endl;
     std::set<std::string> all_a = make_all_subsets(a);
     std::set<std::string> all_b = make_all_subsets(b);
 
@@ -52,10 +52,11 @@ int main(){
     int best_score=-99999;
     int score = 0;
     std::string big, small;
+    std::cout << "Starting computation with " << all_a.size()*all_b.size() << " elements" << std::endl;
     for(auto& el_a : all_a){
         for(auto& el_b : all_b){
             // Same size, just run score_pair
-            std::cout << el_a << ";" << el_b << std::endl;
+            // std::cout << el_a << ";" << el_b << std::endl;
             if(el_a.length() == el_b.length()){
                 score = score_pair(el_a, el_b);
                 if(score > best_score){
