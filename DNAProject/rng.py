@@ -2,8 +2,8 @@
 import random
 import itertools as it
 
-n_list = list(range(2,31,5))
-m_list = list(range(2,31,5))
+n_list = list(range(10,201,10))
+m_list = list(range(10,201,10))
 i = 0
 for n, m in it.product(n_list, m_list):
      file = 'in/dna{0}.seq'.format(i)
