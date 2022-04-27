@@ -15,12 +15,12 @@ int match_score(std::string sb, std::string a, int start, int subseq_size){
     char sa;
     for(int i = 0; i<subseq_size; i++){
         sa = a[i+start];
-        if (sa == sb[i]){
-            score += MATCH;
-        } else if (sa == '-' || sb[i] == '-') {
-            score += MISMATCH;
-        } else {
+        if (sa == '-' || sb[i] == '-'){
             score += GAP;
+        } else if (sa == sb[i]) {
+            score += MATCH;
+        } else {
+            score += MISMATCH;
         }
     }
     return score;

@@ -27,12 +27,12 @@ int score_pair(std::string a, std::string b){
     int score = 0;
     int size = a.length();
     for (int i = 0; i<size; i++){
-        if (a[i] == b[i]){
-            score += MATCH;
-        } else if (a[i] == '-' || b[i] == '-') {
-            score += MISMATCH;
-        } else {
+        if (a[i] == '-' || b[i] == '-'){
             score += GAP;
+        } else if (a[i] == b[i]) {
+            score += MATCH;
+        } else {
+            score += MISMATCH;
         }
     }
     return score;
