@@ -39,7 +39,7 @@ int main(){
     std::uniform_int_distribution<int> subseq_size_distro(4,len_b);
     const int subseq_size = subseq_size_distro(generator);
     
-    std::uniform_int_distribution<int> p_distro(10,100);
+    std::uniform_int_distribution<int> p_distro(100,100+std::abs(len_a-len_b)*2); // Run enough times to probably try most combinations
     const int p = p_distro(generator);
 
     // Algorithm
