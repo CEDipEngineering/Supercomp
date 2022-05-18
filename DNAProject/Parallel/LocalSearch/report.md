@@ -13,6 +13,8 @@ The Local Search algorithm will take a random substring of one of the sequences,
 
 The implementation makes use of the string type and random indexation to test several substrings against a set piece of one of the dna sequences. It accumulates the best result and then returns the best match to that random subsequence.
 
+In this particular scenario, there are two implementations, that make use of the same base calculations, defined in 'func.hpp', however one runs 50 experiments in series, whereas the other runs the 50 in parallel using multithreading (OpenMP).
+
 ## Output Example
  
 Subsequence size: 4
