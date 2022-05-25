@@ -47,36 +47,49 @@ struct line_process {
 };
 
 struct score {
+
+    char y;
+    // Constructor to store them internally
+    score(char y) : y(y) { }
     __host__ __device__
-    int operator()(const thrust::tuple<char, char, int> t){
+    int operator()(const thrust::tuple<char, int, int> t){
         char x = t.get<0>();
-        char y = t.get<1>();
-        int H = t.get<2>();
+        int H_up = t.get<1>();
+        int H_diag = t.get<2>();
         // printf("Strings: %s;%s", a, b);
         int gap, match, miss;
         // Branchless evaluation of three possibilities
-        gap = (x == '-' || y == '-');
-        match = (x == y && !gap);
-        miss = (x != y && !gap);
-        printf("Eval: chars=(%c,%c,%d); gap=%d; match=%d; miss=%d;\n", x, y, H, gap, match, miss);
-        int max = gap;
-        if (match > max) max = match;
-        if (miss > max) max = miss;
-        if (max < 0) max = 0;
+        gap = (y == '-')*(H_up+GAP);
+        match = (x == y && !(y == '-'))*(H_diag+MATCH);
+        miss = (x != y && !(y == '-'))*(H_diag+MISMATCH);
+        printf("Eval: up=(%d); diag=(%c,%c,%d); gap=%d; match=%d; miss=%d;\n", H_up, x, y, H_diag, gap, match, miss);
+        // Branchless evaluation of max
+        int max = ((gap >= match) && (gap > miss))*gap +
+                  ((match > gap) && (match >= miss))*match +
+                  ((miss >= gap) && (miss > match))*miss;
+        max = (max>0)*max;
         return max;
+    }
+};
+
+struct PrintVec {
+    __host__ __device__
+    int operator()(const int y){
+        // Unpack to Sij, Si-1j
+        printf("%d ", y);
+        return y;
     }
 };
 
 struct line_update {
     __host__ __device__
-    int operator()(const thrust::tuple<int, int>& y){
+    int operator()(const int& x, const int& y){
         // Unpack to Sij, Si-1j
-        int curr = y.get<0>();
-        int left = y.get<1>()-1;
+        int curr = y;
+        int left = x-1;
         // Hand compute max
-        int max = curr;
-        if (left > max) max = left;
-        if (max < 0) max = 0;
+        int max = (left > curr)*left + (curr > left)*curr;
+        max = (max>0)*max;
         return max;
     }
 };
@@ -104,49 +117,53 @@ int main(){
     auto begin_Parallel = std::chrono::high_resolution_clock::now();
     // Parallel
 
-    std::cout << "Big string: " << big << std::endl;
-    std::cout << "Small string: " << small << std::endl;
+    // std::cout << "Big string: \t\t" << big << std::endl;
+    // std::cout << "Small string: \t\t" << small << std::endl;
 
     thrust::device_vector<int> UpperRow(big.length());
     thrust::device_vector<int> Temp(big.length());
 
     thrust::fill(UpperRow.begin(), UpperRow.end(), 0);
     thrust::fill(Temp.begin(), Temp.end(), 0);
-
-    // thrust::counting_iterator<int> first(0);
-    // thrust::counting_iterator<int> last = first + big.length();
-    
-    // thrust::transform(
-    //     thrust::make_zip_iterator(thrust::make_tuple(UpperRow.begin(), UpperRow.begin()+1, first)), 
-    //     thrust::make_zip_iterator(thrust::make_tuple(UpperRow.end()-1, UpperRow.end(), last)), 
-    //     Temp.begin()+1, 
-    //     line_process((big.c_str()), (small.c_str()))
-    // );
     
     thrust::device_vector<char> big_str(big.length());
     for(int i = 0; i < big.length(); i++){
         big_str[i] = big[i];
     }
-    thrust::device_vector<char> small_str(small.length());
-    for(int i = 0; i < small.length(); i++){
-        small_str[i] = small[i];
+    // thrust::device_vector<char> small_str(small.length());
+    // for(int i = 0; i < small.length(); i++){
+    //     small_str[i] = small[i];
+    // }
+
+    int high_score = 0;
+    int curr_score = 0;
+    for(int i = 0; i<small.length()-1; i++){
+        // First stage, check against above row
+        thrust::transform(
+            thrust::make_zip_iterator(thrust::make_tuple(big_str.begin()+1, UpperRow.begin()+1, UpperRow.begin())),
+            thrust::make_zip_iterator(thrust::make_tuple(big_str.end(), UpperRow.end(), UpperRow.end()-1)),
+            Temp.begin()+1, 
+            score(small[i+1])
+        );
+        std::cout << std::endl;
+        // thrust::transform(Temp.begin(), Temp.end(), Temp.begin(), PrintVec());
+        // std::cout << std::endl;
+        // Second stage, check against self left 
+        thrust::inclusive_scan(
+            Temp.begin(),
+            Temp.end(),
+            UpperRow.begin(), 
+            line_update()
+        );
+        // thrust::transform(UpperRow.begin(), UpperRow.end(), UpperRow.begin(), PrintVec());
+        // std::cout << std::endl;
+        curr_score = thrust::reduce(UpperRow.begin(), UpperRow.end(), 0, thrust::maximum<int>());
+        if (curr_score > high_score) high_score = curr_score;
     }
-    // thrust::generate(big_str.begin(), big_str.end(), thrust::make_constant_iterator<char>(22));
-    
-    
-    thrust::transform(
-        thrust::make_zip_iterator(thrust::make_tuple(big_str.begin(), small_str.begin(), UpperRow.begin())),
-        thrust::make_zip_iterator(thrust::make_tuple(big_str.end(), small_str.end(), UpperRow.end())),
-        big_str.begin(), 
-        score()
-    );
-    std::cout << std::endl;
+    std::cout << "Highest score was: " << high_score << std::endl;
 
 
-    // thrust::transform(thrust::make_counting_iterator(0), thrust::make_counting_iterator(3), X.begin(), score(const_cast<char *>(big.c_str()), const_cast<char *>(small.c_str())));
-
-
-    // Output
+   // Output
     auto end_Parallel = std::chrono::high_resolution_clock::now();
     auto elapsed_Parallel = std::chrono::duration_cast<std::chrono::nanoseconds>(end_Parallel - begin_Parallel);
     // if (SHOW_REPORT){
