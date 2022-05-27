@@ -19,6 +19,7 @@
 #define MISMATCH -1
 #define GAP -1
 #define SHOW_REPORT false
+#define SHOW_MATRIX true
 
 struct score {
     // Character of row;
@@ -31,16 +32,14 @@ struct score {
         int H_up = t.get<1>();
         int H_diag = t.get<2>();
         // printf("Strings: %s;%s", a, b);
-        int gap, match, miss;
+        int up, diag;
         // Branchless evaluation of three possibilities
-        gap = (y == '-')*(H_up+GAP);
-        match = (x == y && !(y == '-'))*(H_diag+MATCH);
-        miss = (x != y && !(y == '-'))*(H_diag+MISMATCH);
+        up = (H_up+GAP); // Above
+        diag = (x != y)*(H_diag+MISMATCH) + (x == y)*(H_diag+MATCH); // Diag
         // printf("Eval: up=(%d); diag=(%c,%c,%d); gap=%d; match=%d; miss=%d;\n", H_up, x, y, H_diag, gap, match, miss);
         // Branchless evaluation of max
-        int max = ((gap >= match) && (gap > miss))*gap +
-                  ((match > gap) && (match >= miss))*match +
-                  ((miss >= gap) && (miss > match))*miss;
+        int max = (up > diag)*up +
+                  (diag >= up)*diag;
         max = (max>0)*max;
         return max;
     }
@@ -62,8 +61,9 @@ struct line_update {
         int curr = y;
         int left = x-1;
         // Hand compute max
-        int max = (left > curr)*left + (curr > left)*curr;
+        int max = (left >= curr)*left + (curr > left)*curr;
         max = (max>0)*max;
+        // if(max != 0) printf("X = %d Y = %d LEFT = %d CURR = %d OUT = %d\n", x, y, left, curr, max);
         return max;
     }
 };
@@ -105,6 +105,11 @@ int main(){
 
     int high_score = 0;
     int curr_score = 0;
+    // Debug printing
+    if (SHOW_MATRIX){
+        thrust::transform(UpperRow.begin(), UpperRow.end(), UpperRow.begin(), PrintVec());
+        std::cout << std::endl;
+    }
     for(int i = 0; i<small.length()-1; i++){
         
         // First stage, check against above row
@@ -129,8 +134,10 @@ int main(){
         );
         
         // Debug printing
-        // thrust::transform(UpperRow.begin(), UpperRow.end(), UpperRow.begin(), PrintVec());
-        // std::cout << std::endl;
+        if (SHOW_MATRIX){
+            thrust::transform(UpperRow.begin(), UpperRow.end(), UpperRow.begin(), PrintVec());
+            std::cout << std::endl;
+        }
 
         // Keep track of best score
         curr_score = thrust::reduce(UpperRow.begin(), UpperRow.end(), 0, thrust::maximum<int>());
