@@ -18,8 +18,8 @@
 #define MATCH 2
 #define MISMATCH -1
 #define GAP -1
-#define SHOW_REPORT false
-#define SHOW_MATRIX true
+#define SHOW_REPORT true
+#define SHOW_MATRIX false
 
 struct score {
     // Character of row;
@@ -68,29 +68,7 @@ struct line_update {
     }
 };
 
-
-int main(){
-
-    // Inputs
-    int len_a, len_b;
-    std::cin >> len_a >> len_b;
-    std::string a, b;
-    std::cin >> a >> b;
-    std::string big, small;
-    a = "-" + a;
-    b = "-" + b;
-
-    if(len_a > len_b){
-        big = a;
-        small = b;
-    } else {
-        big = b;
-        small = a;
-    }
-
-    auto begin_Parallel = std::chrono::high_resolution_clock::now();
-    // Parallel
-
+int smithwaterman_score_seq(std::string big, std::string small) {
     // Create and fill both row vectors with zero
     thrust::device_vector<int> UpperRow(big.length());
     thrust::device_vector<int> Temp(big.length());
@@ -143,6 +121,64 @@ int main(){
         curr_score = thrust::reduce(UpperRow.begin(), UpperRow.end(), 0, thrust::maximum<int>());
         if (curr_score > high_score) high_score = curr_score;
     }
+    return high_score;
+}
+
+int main(){
+
+    // Inputs
+    int len_a, len_b;
+    std::cin >> len_a >> len_b;
+    std::string a, b;
+    std::cin >> a >> b;
+    std::string big, small;
+    a = "-" + a;
+    b = "-" + b;
+
+    if(len_a > len_b){
+        big = a;
+        small = b;
+    } else {
+        big = b;
+        small = a;
+    }
+
+    auto begin_Parallel = std::chrono::high_resolution_clock::now();
+    // Parallel
+
+    std::string match_small, match_big;
+    std::string sa, sb;
+    int high_score = MISMATCH * len_a * len_b; 
+    int score = 0;
+    unsigned long num_iter = 0;
+    int curr_size = small.length();
+    while (curr_size > 0){
+        // For every substring you can fit in the smaller sequence:
+        for (int i = 0; i<=small.length()-curr_size; i++){
+            sa = small.substr(i, curr_size);
+            // Try every substring you can fit on the bigger sequence:
+            for (int j = 0; j<=big.length()-curr_size; j++){
+                num_iter++;
+                sb = big.substr(j, curr_size);
+                // std::cout << "SA: " << sa << " SB: " << sb << std::endl;
+                score = smithwaterman_score_seq(sa, sb);
+                if (score > high_score){
+                    high_score = score;
+                    match_small = sa;
+                    match_big = sb;
+                    // Can't get any better than full match
+                    if (score > curr_size*MATCH) {
+                        break;
+                    }
+                    // std::cout << high_score << " " << match_small << std::endl << match_big << std::endl;
+                }
+            }
+        }
+        // break;
+        curr_size--;
+    }
+    
+
 
     // Output
     auto end_Parallel = std::chrono::high_resolution_clock::now();

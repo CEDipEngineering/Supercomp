@@ -56,12 +56,12 @@ int main(){
         size_big = big.size();
         size_small = small.size();
 
-        int curr_size = size_small;
         int high_score = -9999;
         int score = 0;
         std::string match_small, match_big;
         std::string sa, sb;
         unsigned long num_iter = 0;
+        int curr_size = size_small;
         while (curr_size > 0){
             // For every substring you can fit in the smaller sequence:
             for (int i = 0; i<=size_small-curr_size; i++){
