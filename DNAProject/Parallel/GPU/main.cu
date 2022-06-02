@@ -18,7 +18,7 @@
 #define MATCH 2
 #define MISMATCH -1
 #define GAP -1
-#define SHOW_REPORT true
+#define SHOW_REPORT false
 #define SHOW_MATRIX false
 
 struct score {

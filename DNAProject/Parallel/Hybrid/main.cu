@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
+#include <omp.h>
 
 #define MATCH 2
 #define MISMATCH -1
@@ -80,7 +81,7 @@ int smithwaterman_score_seq(
     int smallStrStart, int smallStrEnd
 ) {
     thrust::fill(UpperRow_begin, UpperRow_end, 0);
-
+    
     int high_score = 0;
     int curr_score = 0;
     // Debug printing
@@ -159,13 +160,13 @@ int main(){
 
     thrust::device_vector<int> UpperRow(big.length());
     thrust::device_vector<int> Temp(big.length());
-
-    int curr_size = small.length()-1;
-    std::string match_small, match_big;
+    
+    int curr_size;
     int smallStringStart, smallStringEnd, bigStringStart, bigStringEnd;
     int high_score = MISMATCH * len_a * len_b; 
     int score = 0;
-    while (curr_size > 0){
+    #pragma omp parallel for reduction(max:high_score)
+    for(curr_size = small.length()-1; curr_size>0; curr_size--){
         for (int i = 1; i<small.length()-curr_size+1; i++){
             for (int j = 1; j<big.length()-curr_size+1; j++){
                 smallStringStart = i;
@@ -178,15 +179,7 @@ int main(){
                     bigstr.begin() + bigStringStart, bigstr.begin() + bigStringEnd,
                     smallstr, smallStringStart, smallStringEnd
                 );
-                if (score > high_score){
-                    high_score = score;
-                    match_big = big.substr(bigStringStart, curr_size);
-                    match_small = small.substr(smallStringStart, curr_size);
-                }
-                // printf("(%d,%d)=>(%d,%d)", smallStringStart, bigStringStart, smallStringEnd, bigStringEnd);
-                // printf(" Vector pos: (%d,%d)", 0, curr_size);
-                // std::cout << std::endl;
-
+                high_score = score > high_score ? score : high_score;
             }
         }
         curr_size = 0;
@@ -204,8 +197,6 @@ int main(){
         std::cout << "Parallel: " << std::endl;
         std::cout << "=======================================" << std::endl;
         printf("Time measured: %.6f seconds.\n", elapsed_Parallel.count() * 1e-9);
-        std::cout << "Match string 1: " << match_big << std::endl;
-        std::cout << "Match string 2: " << match_small << std::endl;
         std::cout << "Score: " << high_score << std::endl;
     } else {
         std::cout << high_score << std::endl;
