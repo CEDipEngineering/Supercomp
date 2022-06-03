@@ -161,12 +161,12 @@ int main(){
     thrust::device_vector<int> UpperRow(big.length());
     thrust::device_vector<int> Temp(big.length());
     
-    int curr_size;
-    int smallStringStart, smallStringEnd, bigStringStart, bigStringEnd;
     int high_score = MISMATCH * len_a * len_b; 
-    int score = 0;
+    int curr_size;
     #pragma omp parallel for reduction(max:high_score)
     for(curr_size = small.length()-1; curr_size>0; curr_size--){
+        int smallStringStart, smallStringEnd, bigStringStart, bigStringEnd;
+        int score = 0;
         for (int i = 1; i<small.length()-curr_size+1; i++){
             for (int j = 1; j<big.length()-curr_size+1; j++){
                 smallStringStart = i;
