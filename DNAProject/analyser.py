@@ -12,8 +12,6 @@ import itertools as it
 
 # Run with nohup python3 analyser.py & > nohup.txt
 
-test_list = list(map(lambda x: 'in/'+x, os.listdir('in')))
-
 class Test():
     def __init__(self, size_a, size_b, time):
         self.size_a = size_a
@@ -31,20 +29,21 @@ def gen_seq(n, m):
           ''.join(random.choices(['A','T','C','G','-'],k=m))]
      return ''.join(seq)
 
-exe = [
-    # ('Sequential/LocalSearch/main', 500), 
-    # ('Sequential/SmithWaterman/main', 500), 
-    # ('Sequential/ExaustiveSearch/main', 100), 
-    # ('Sequential/BoundedExaustiveSearch/main', 500),
-    # ('Parallel/GPU/main', 100),
-    # ('Parallel/Hybrid/main', 200),
-    ('Parallel/LocalSearch/main_par', 200),
-    ('Parallel/LocalSearch/main_seq', 200)
-]
-
-
 if __name__ == "__main__":  
     print("Starting tests...")
+
+    exe = [
+        ('Sequential/LocalSearch/main', 500), 
+        ('Sequential/SmithWaterman/main', 500), 
+        ('Sequential/ExaustiveSearch/main', 100), 
+        ('Sequential/BoundedExaustiveSearch/main', 500),
+        ('Parallel/GPU/main', 100),
+        ('Parallel/Hybrid/main', 200),
+        ('Parallel/LocalSearch/main_par', 200),
+        ('Parallel/LocalSearch/main_seq', 200)
+    ]
+
+
     time_dict = {}
     for x, s in exe:
         time_dict[x] = []
