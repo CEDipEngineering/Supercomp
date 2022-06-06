@@ -24,8 +24,8 @@ Note that this algorithm is NOT extensive, and does not guarantee the perfect so
 
 ## Conclusion
 
-    This algorithm can converge on an optimal solution very quickly, since it makes good use of randomness to explore the space of possibilities, meanwhile still maintaining a sense of slow and steady approach to its final objective, by making use of knowledge regarding the problem's characteristics (which takes shape by way of the fitness function).
+This algorithm can converge on an optimal solution very quickly, since it makes good use of randomness to explore the space of possibilities, meanwhile still maintaining a sense of slow and steady approach to its final objective, by making use of knowledge regarding the problem's characteristics (which takes shape by way of the fitness function).
 
-    The real beauty of this technique comes from the fact that any problem for which you can define a fitness function, can be solved using this algorithm.
+The real advantage of this technique comes from the fact that any problem for which you can define a fitness function, can be solved using this algorithm.
 
-    There are many ways to improve this algorithm, such as modifying the fitness function to consider other factors, or applying heuristics to the generation of the initial population.
+There are many ways to improve this implementation, such as modifying the fitness function to consider other factors, or applying heuristics to the generation of the initial population.
