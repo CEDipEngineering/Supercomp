@@ -32,18 +32,18 @@ def gen_seq(n, m):
      return ''.join(seq)
 
 exe = [
-    ('Sequential/LocalSearch/main', 500), 
-    ('Sequential/SmithWaterman/main', 350), 
-    ('Sequential/ExaustiveSearch/main', 50), 
-    ('Sequential/BoundedExaustiveSearch/main', 200),
-    ('Parallel/GPU/main', 50),
-    ('Parallel/Hybrid/main', 100),
-    ('Parallel/LocalSearch/main_par', 100),
-    ('Parallel/LocalSearch/main_seq', 100)
+    # ('Sequential/LocalSearch/main', 500), 
+    # ('Sequential/SmithWaterman/main', 500), 
+    # ('Sequential/ExaustiveSearch/main', 100), 
+    # ('Sequential/BoundedExaustiveSearch/main', 500),
+    # ('Parallel/GPU/main', 100),
+    # ('Parallel/Hybrid/main', 200),
+    ('Parallel/LocalSearch/main_par', 200),
+    ('Parallel/LocalSearch/main_seq', 200)
 ]
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
     print("Starting tests...")
     time_dict = {}
     for x, s in exe:
@@ -66,6 +66,6 @@ if __name__ == "__main__":
         progress += 1
         print("\r" + " "*100, end = '\r')
         print("Done with {0}".format(ex))
-        print(f"\rProgress: {progress}/{len(test_list)} ({100*progress/len(test_list):.02f}%) last_test=({n}, {m})", end='\r')
-    with open('/home/user/Supercomp/DNAProject/cache.pickle', 'wb') as f:
+        print(f"\rProgress: {progress}/{len(exe)} ({100*progress/len(exe):.02f}%) last_test=({n}, {m})", end='\r')
+    with open('/home/user/Supercomp/DNAProject/cache_big.pickle', 'wb') as f:
         pickle.dump(time_dict, f)
